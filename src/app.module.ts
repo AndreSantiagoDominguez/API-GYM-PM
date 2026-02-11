@@ -10,7 +10,7 @@ import { GymsModule } from './Gyms/infrastructure/gyms.module';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: '.env',
+      envFilePath: '.env.example',
     }),
     DatabaseModule,
     AuthModule,
