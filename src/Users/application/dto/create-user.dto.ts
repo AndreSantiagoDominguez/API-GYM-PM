@@ -34,18 +34,20 @@ export class CreateUserDto {
 
   @IsOptional()
   @IsDateString()
-  fechaNacimiento?: string;
+  fecha_nacimiento?: string;
 
-  @IsOptional()
-  @IsNumber()
-  @IsNotEmpty({ message: 'El rol es requerido' })
-  rolId: number;
-
-  @IsOptional()
-  @IsNumber()
-  gymId?: number;
 
   @IsOptional()
   @IsBoolean()
   activo?: boolean;
+
+  @IsOptional()
+  @IsNumber()
+  @IsNotEmpty({ message: 'El rol es requerido' })
+  rol_id: number;
+
+  @IsOptional()
+  @IsNumber()
+  gym_id?: number;
+
 }
