@@ -20,27 +20,28 @@ export class CreateUserUseCase {
   ) { }
 
   async execute(dto: CreateUserDto, currentUser: User): Promise<User> {
-    const queryRunner = this.dataSource.createQueryRunner();
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
-
-    try {
-      // Verificar email único
+    // Usamos el manager de la transacción para asegurar atomicidad
+    return await this.dataSource.transaction(async (manager) => {
+      
+      // 1. Verificar email único
       const existingUser = await this.userRepository.findByEmail(dto.email);
       if (existingUser) {
         throw new ConflictException('El email ya está registrado');
       }
 
-      // Verificar rol
+      // 2. Verificar existencia del rol
       const role = await this.roleRepository.findById(dto.rol_id);
       if (!role) {
         throw new NotFoundException('Rol no encontrado');
       }
 
-      // Validar permisos
+      // 3. Validar permisos (Importante: currentUser debe tener el rol cargado)
+      if (!currentUser.rol || !currentUser.rol.nombre) {
+        throw new ForbiddenException('El usuario actual no tiene un rol asignado o cargado');
+      }
       this.validatePermissions(currentUser, role.nombre);
 
-      // Verificar gym si aplica
+      // 4. Verificar gym si se proporciona uno en el DTO
       if (dto.gym_id) {
         const gym = await this.gymRepository.findById(dto.gym_id);
         if (!gym) {
@@ -48,53 +49,56 @@ export class CreateUserUseCase {
         }
       }
 
-      // Determinar gymId
+      // 5. Determinar gymId final basado en jerarquía
       let finalGymId = dto.gym_id;
       if (currentUser.rol.nombre !== 'super_admin') {
-        finalGymId = currentUser.gymId;
+        // Si no es super_admin, se le asigna obligatoriamente el gym del creador
+        finalGymId = currentUser.gymId || currentUser.gymId; 
       }
 
-      // Hash password
+      // 6. Hash del password
       const hashedPassword = await bcrypt.hash(dto.password, 10);
 
-      const newUser = await this.userRepository.create({
-        ...dto,
-        password: hashedPassword,
-        gymId: finalGymId,
-        activo: dto.activo ?? true,
-        // Convertimos el string a objeto Date
-        fechaNacimiento: dto.fecha_nacimiento ? new Date(dto.fecha_nacimiento) : undefined,
-      });
+      // 7. Mapeo y Creación
+      // Nota: Asegúrate que los nombres de los campos coincidan con tu Entidad (snake_case vs camelCase)
+      try {
+        const newUser = await this.userRepository.create({
+          ...dto,
+          password: hashedPassword,
+          gymId: finalGymId, // Usamos el nombre que TypeORM espera en la BD según tu log
+          activo: dto.activo ?? true,
+          fechaNacimiento: dto.fecha_nacimiento ? new Date(dto.fecha_nacimiento) : undefined,
+        });
 
-      await queryRunner.commitTransaction();
-      return newUser;
-    } catch (error) {
-      await queryRunner.rollbackTransaction();
-      throw error;
-    } finally {
-      await queryRunner.release();
-    }
+        return newUser;
+      } catch (dbError) {
+        // Esto atrapará errores de base de datos no controlados (ej. FK fails)
+        throw new ConflictException('Error al guardar el usuario en la base de datos');
+      }
+    });
   }
 
-  private validatePermissions(currentUser: User, targetRole: string): void {
-    const role = currentUser.rol.nombre;
+  private validatePermissions(currentUser: User, targetRoleName: string): void {
+    const myRole = currentUser.rol.nombre;
 
-    if (role === 'super_admin') return;
+    if (myRole === 'super_admin') return;
 
-    if (role === 'admin') {
-      if (targetRole === 'super_admin' || targetRole === 'admin') {
-        throw new ForbiddenException('No puedes crear usuarios con este rol');
+    if (myRole === 'admin') {
+      // El admin no puede crear otros admins ni super_admins
+      if (targetRoleName === 'super_admin' || targetRoleName === 'admin') {
+        throw new ForbiddenException('No tienes permisos para asignar este rol');
       }
       return;
     }
 
-    if (role === 'empleado') {
-      if (targetRole !== 'cliente') {
-        throw new ForbiddenException('Solo puedes crear clientes');
+    if (myRole === 'empleado') {
+      // El empleado solo puede crear clientes
+      if (targetRoleName !== 'cliente') {
+        throw new ForbiddenException('Un empleado solo puede registrar clientes');
       }
       return;
     }
 
-    throw new ForbiddenException('No tienes permisos para crear usuarios');
+    throw new ForbiddenException('No tienes permisos suficientes para realizar esta acción');
   }
 }
