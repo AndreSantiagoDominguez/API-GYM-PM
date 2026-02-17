@@ -58,7 +58,7 @@ export class UpdateUserUseCase {
     if (role === 'super_admin') return;
 
     if (role === 'admin') {
-      if (targetUser.gymId !== currentUser.gymId) {
+      if (targetUser.gym_id !== currentUser.gym_id) {
         throw new ForbiddenException('No puedes modificar usuarios de otro gimnasio');
       }
       if (targetUser.rol.nombre === 'super_admin' || targetUser.rol.nombre === 'admin') {
@@ -68,7 +68,7 @@ export class UpdateUserUseCase {
     }
 
     if (role === 'empleado') {
-      if (targetUser.gymId !== currentUser.gymId || targetUser.rol.nombre !== 'cliente') {
+      if (targetUser.gym_id !== currentUser.gym_id || targetUser.rol.nombre !== 'cliente') {
         throw new ForbiddenException('Solo puedes modificar clientes de tu gimnasio');
       }
       return;

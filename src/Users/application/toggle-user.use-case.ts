@@ -21,7 +21,7 @@ export class ToggleUserUseCase {
       throw new ForbiddenException('No tienes permisos para esta acción');
     }
 
-    if (role === 'admin' && user.gymId !== currentUser.gymId) {
+    if (role === 'admin' && user.gym_id !== currentUser.gym_id) {
       throw new ForbiddenException('No puedes modificar usuarios de otro gimnasio');
     }
 

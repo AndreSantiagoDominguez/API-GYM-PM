@@ -32,17 +32,17 @@ export class RegisterUseCase {
     const newUser = await this.userRepository.create({
       ...dto,
       password: hashedPassword,
-      rolId: superAdminRole.id,
-      gymId: null,
+      rol_id: superAdminRole.id,
+      gym_id: null,
       activo: true,
-      fechaNacimiento: dto.fechaNacimiento ? new Date(dto.fechaNacimiento) : undefined,
+      fecha_nacimiento: dto.fechaNacimiento ? new Date(dto.fechaNacimiento) : undefined,
     });
 
     const payload = {
       sub: newUser.id,
       email: newUser.email,
       rol: newUser.rol?.nombre,
-      gymId: newUser.gymId,
+      gymId: newUser.gym_id,
     };
 
     const token = this.jwtService.sign(payload);

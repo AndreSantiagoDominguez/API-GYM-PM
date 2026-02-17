@@ -49,7 +49,7 @@ export class DeleteUserUseCase {
     }
 
     if (role === 'admin') {
-      if (targetUser.gymId !== currentUser.gymId) {
+      if (targetUser.gym_id !== currentUser.gym_id) {
         throw new ForbiddenException('No puedes eliminar usuarios de otro gimnasio');
       }
       if (targetUser.rol.nombre === 'super_admin' || targetUser.rol.nombre === 'admin') {

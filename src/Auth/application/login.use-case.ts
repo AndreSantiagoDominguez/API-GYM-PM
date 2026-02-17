@@ -34,7 +34,7 @@ export class LoginUseCase {
       sub: user.id,
       email: user.email,
       rol: user.rol?.nombre,
-      gymId: user.gymId,
+      gymId: user.gym_id,
     };
 
     const token = this.jwtService.sign(payload);

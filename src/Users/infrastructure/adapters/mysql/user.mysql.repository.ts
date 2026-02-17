@@ -32,9 +32,9 @@ export class UserMySqlRepository implements IUserRepository {
     });
   }
 
-  async findByGymId(gymId: number): Promise<User[]> {
+  async findByGymId(gym_id: number): Promise<User[]> {
     return this.userRepository.find({
-      where: { gymId },
+      where: { gym_id },
       relations: ['rol', 'gym'],
       order: { apellidos: 'ASC' },
     });
