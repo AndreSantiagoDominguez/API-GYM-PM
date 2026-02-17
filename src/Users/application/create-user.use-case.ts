@@ -32,7 +32,7 @@ export class CreateUserUseCase {
       }
 
       // Verificar rol
-      const role = await this.roleRepository.findById(dto.rolId);
+      const role = await this.roleRepository.findById(dto.rol_id);
       if (!role) {
         throw new NotFoundException('Rol no encontrado');
       }
@@ -41,15 +41,15 @@ export class CreateUserUseCase {
       this.validatePermissions(currentUser, role.nombre);
 
       // Verificar gym si aplica
-      if (dto.gymId) {
-        const gym = await this.gymRepository.findById(dto.gymId);
+      if (dto.gym_id) {
+        const gym = await this.gymRepository.findById(dto.gym_id);
         if (!gym) {
           throw new NotFoundException('Gym no encontrado');
         }
       }
 
       // Determinar gymId
-      let finalGymId = dto.gymId;
+      let finalGymId = dto.gym_id;
       if (currentUser.rol.nombre !== 'super_admin') {
         finalGymId = currentUser.gymId;
       }
@@ -63,7 +63,7 @@ export class CreateUserUseCase {
         gymId: finalGymId,
         activo: dto.activo ?? true,
         // Convertimos el string a objeto Date
-        fechaNacimiento: dto.fechaNacimiento ? new Date(dto.fechaNacimiento) : undefined,
+        fechaNacimiento: dto.fecha_nacimiento ? new Date(dto.fecha_nacimiento) : undefined,
       });
 
       await queryRunner.commitTransaction();
