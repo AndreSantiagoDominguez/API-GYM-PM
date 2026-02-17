@@ -17,7 +17,6 @@ import { CurrentUser } from '../../../core/decorators/current-user.decorator';
 import { User } from '../../domain/user.entity';
 
 @Controller('users')
-@UseGuards(JwtAuthGuard, RolesGuard)
 export class UserController {
   constructor(
     private readonly getAllUsersUseCase: GetAllUsersUseCase,
@@ -28,7 +27,7 @@ export class UserController {
     private readonly toggleUserUseCase: ToggleUserUseCase,
   ) {}
 
-  @Get()
+  @Get('/')
   @Roles(RoleNames.SUPER_ADMIN)
   async findAll() {
     const users = await this.getAllUsersUseCase.execute();
@@ -55,7 +54,7 @@ export class UserController {
     return { success: true, message: 'Usuario obtenido', data: user };
   }
 
-  @Post()
+  @Post("/")
   @Roles(RoleNames.SUPER_ADMIN, RoleNames.ADMIN, RoleNames.EMPLEADO)
   @HttpCode(HttpStatus.CREATED)
   async create(@Body() dto: CreateUserDto, @CurrentUser() currentUser: User) {

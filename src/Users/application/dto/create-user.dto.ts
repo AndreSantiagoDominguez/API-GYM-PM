@@ -36,6 +36,7 @@ export class CreateUserDto {
   @IsDateString()
   fechaNacimiento?: string;
 
+  @IsOptional()
   @IsNumber()
   @IsNotEmpty({ message: 'El rol es requerido' })
   rolId: number;
