@@ -58,6 +58,8 @@ export class UserController {
   @Roles(RoleNames.SUPER_ADMIN, RoleNames.ADMIN, RoleNames.EMPLEADO)
   @HttpCode(HttpStatus.CREATED)
   async create(@Body() dto: CreateUserDto, @CurrentUser() currentUser: User) {
+    console.log(dto);
+    
     const user = await this.createUserUseCase.execute(dto, currentUser);
     return { success: true, message: 'Usuario creado', data: user };
   }
