@@ -23,46 +23,7 @@ export class CreateUserUseCase {
 
     try {
       // --- PASO CRÍTICO: Asegurar que el currentUser tenga el Rol cargado ---
-      let userWithPermissions = currentUser;
-      if (!currentUser.rol || !currentUser.rol.nombre) {
-        const found = await this.userRepository.findById(currentUser.id);
-        if (!found || !found.rol) {
-          throw new ForbiddenException('No se pudo verificar el rol del usuario actual');
-        }
-        userWithPermissions = found;
-      }
-
-      console.log("estuve aqui funcioinando");
-      
-
-      // 1. Verificar si el email ya existe
-      const existingUser = await this.userRepository.findByEmail(dto.email);
-      if (existingUser) {
-        throw new ConflictException('El email ya está registrado');
-      }
-
-      // 2. Verificar existencia del rol que se quiere asignar al nuevo usuario
-      const roleToAssign = await this.roleRepository.findById(dto.rol_id);
-      if (!roleToAssign) {
-        throw new NotFoundException('El rol solicitado no existe');
-      }
-
-      // 3. Validar permisos (Usando el usuario que ya confirmamos que tiene rol)
-      this.validatePermissions(userWithPermissions, roleToAssign.nombre);
-
-      // 4. Verificar Gym si viene en el DTO
-      if (dto.gym_id) {
-        const gym = await this.gymRepository.findById(dto.gym_id);
-        if (!gym) {
-          throw new NotFoundException('El gimnasio no existe');
-        }
-      }
-
-      // 5. Determinar Gym final
-      // Si es super_admin usa el del DTO, si no, usa el del usuario que está creando
-      const finalGymId = userWithPermissions.rol.nombre === 'super_admin' 
-        ? dto.gym_id 
-        : (userWithPermissions.gym_id || userWithPermissions.gym_id);
+    
 
       const hashedPassword = await bcrypt.hash(dto.password, 10);
 
@@ -75,7 +36,7 @@ export class CreateUserUseCase {
         telefono: dto.telefono,
         fecha_nacimiento: dto.fecha_nacimiento ? new Date(dto.fecha_nacimiento) : undefined,
         rol_id: dto.rol_id,
-        gym_id: finalGymId,
+        gym_id: dto.gym_id,
         activo: dto.activo ?? true,
       });
 
