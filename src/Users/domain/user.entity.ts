@@ -33,7 +33,7 @@ export class User {
   telefono: string;
 
   @Column({ type: 'date', name: 'fecha_nacimiento', nullable: true })
-  fechaNacimiento: Date;
+  fecha_nacimiento: Date;
 
   @Column({ type: 'boolean', default: true })
   activo: boolean;
@@ -43,14 +43,14 @@ export class User {
   rol: Role;
 
   @Column({ name: 'rol_id' })
-  rolId: number;
+  rol_id: number;
 
   @ManyToOne(() => Gym, (gym) => gym.users, { eager: true, nullable: true })
   @JoinColumn({ name: 'gym_id' })
   gym: Gym;
 
   @Column({ name: 'gym_id', nullable: true })
-  gymId: number;
+  gym_id: number;
 
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;

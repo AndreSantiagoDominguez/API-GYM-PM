@@ -40,7 +40,7 @@ export class UserController {
     @Param('gymId', ParseIntPipe) gymId: number,
     @CurrentUser() currentUser: User,
   ) {
-    if (currentUser.rol.nombre !== 'super_admin' && currentUser.gymId !== gymId) {
+    if (currentUser.rol.nombre !== 'super_admin' && currentUser.gym_id !== gymId) {
       return { success: false, message: 'No tienes acceso a este gimnasio', data: null };
     }
     const users = await this.getUserUseCase.executeByGym(gymId);
