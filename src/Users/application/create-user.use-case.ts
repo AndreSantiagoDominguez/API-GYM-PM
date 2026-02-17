@@ -36,12 +36,7 @@ export class CreateUserUseCase {
         throw new NotFoundException('El rol solicitado no existe');
       }
 
-      // 3. VALIDACIÓN DE PERMISOS (Blindada)
-      // Si currentUser.rol no existe, fallará. Verificamos primero:
-      if (!currentUser.rol) {
-         throw new ForbiddenException('El usuario que crea no tiene un rol asignado en la sesión');
-      }
-      this.validatePermissions(currentUser, roleToAssign.nombre);
+
 
       // 4. Verificar Gym
       if (dto.gym_id) {
