@@ -32,6 +32,9 @@ export class CreateUserUseCase {
         userWithPermissions = found;
       }
 
+      console.log("estuve aqui funcioinando");
+      
+
       // 1. Verificar si el email ya existe
       const existingUser = await this.userRepository.findByEmail(dto.email);
       if (existingUser) {
