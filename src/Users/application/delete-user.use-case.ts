@@ -19,25 +19,25 @@ export class DeleteUserUseCase {
   try {
     const userToDelete = await this.userRepository.findById(id);
     
-    // 1. SI NO EXISTE, LANZA ERROR Y DETÉN TODO
+    // VALIDACIÓN CRUCIAL: Si no hay usuario, lanza error y detén el proceso
     if (!userToDelete) {
-      throw new NotFoundException(`Usuario con ID ${id} no encontrado`);
+      throw new NotFoundException(`El usuario con ID ${id} no existe`);
     }
 
-    // 2. SI SE INTENTA BORRAR A SÍ MISMO, LANZA ERROR
+    // No permitir borrarse a uno mismo
     if (userToDelete.id === currentUser.id) {
        throw new ForbiddenException('No puedes eliminar tu propia cuenta');
     }
 
-    // Validar permisos de roles
     this.validatePermissions(currentUser, userToDelete);
 
     await this.userRepository.delete(id);
     await queryRunner.commitTransaction();
-    
+
   } catch (error) {
     await queryRunner.rollbackTransaction();
-    // Re-lanzamos el error para que NestJS envíe la respuesta correcta al cliente (404, 403, etc)
+    // ¡IMPORTANTE! Si no haces throw, NestJS cree que todo salió bien pero no devuelve nada
+    console.error("ERROR EN USE CASE:", error.message);
     throw error; 
   } finally {
     await queryRunner.release();
