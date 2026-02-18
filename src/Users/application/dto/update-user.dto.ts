@@ -36,8 +36,8 @@ export class UpdateUserDto {
 
   @IsOptional()
   @Type(() => Date) 
-  @IsDate()   
-  fechaNacimiento?: Date;
+  @IsDateString()   
+  fechaNacimiento?: String;
 
   @IsOptional()
   @IsNumber()
