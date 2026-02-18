@@ -12,31 +12,37 @@ export class DeleteUserUseCase {
   ) {}
 
   async execute(id: number, currentUser: User): Promise<void> {
-    const queryRunner = this.dataSource.createQueryRunner();
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
+  const queryRunner = this.dataSource.createQueryRunner();
+  await queryRunner.connect();
+  await queryRunner.startTransaction();
 
-    try {
-      const userToDelete = await this.userRepository.findById(id);
-      if (!userToDelete) {
-        console.log(`Usuario con ID ${id} no encontrado`);
-      }
-
-      if (userToDelete.id === currentUser.id) {
-         console.log('No puedes eliminarte a ti mismo');
-      }
-
-      this.validatePermissions(currentUser, userToDelete);
-
-      await this.userRepository.delete(id);
-      await queryRunner.commitTransaction();
-    } catch (error) {
-      await queryRunner.rollbackTransaction();
-       console.log(error);
-    } finally {
-      await queryRunner.release();
+  try {
+    const userToDelete = await this.userRepository.findById(id);
+    
+    // 1. SI NO EXISTE, LANZA ERROR Y DETÉN TODO
+    if (!userToDelete) {
+      throw new NotFoundException(`Usuario con ID ${id} no encontrado`);
     }
+
+    // 2. SI SE INTENTA BORRAR A SÍ MISMO, LANZA ERROR
+    if (userToDelete.id === currentUser.id) {
+       throw new ForbiddenException('No puedes eliminar tu propia cuenta');
+    }
+
+    // Validar permisos de roles
+    this.validatePermissions(currentUser, userToDelete);
+
+    await this.userRepository.delete(id);
+    await queryRunner.commitTransaction();
+    
+  } catch (error) {
+    await queryRunner.rollbackTransaction();
+    // Re-lanzamos el error para que NestJS envíe la respuesta correcta al cliente (404, 403, etc)
+    throw error; 
+  } finally {
+    await queryRunner.release();
   }
+}
 
   private validatePermissions(currentUser: User, targetUser: User): void {
     const role = currentUser.rol.nombre;
