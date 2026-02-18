@@ -78,6 +78,7 @@ export class UserController {
   @Delete('/:id')
   @Roles(RoleNames.SUPER_ADMIN, RoleNames.ADMIN)
   async delete(@Param('id', ParseIntPipe) id: number, @CurrentUser() currentUser: User) {
+    console.log("entro en delete ",id)
     await this.deleteUserUseCase.execute(id, currentUser);
     return { success: true, message: 'Usuario eliminado', data: null };
   }
