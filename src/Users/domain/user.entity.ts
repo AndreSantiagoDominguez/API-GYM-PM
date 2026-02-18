@@ -32,8 +32,8 @@ export class User {
   @Column({ type: 'varchar', length: 20, nullable: true })
   telefono: string;
 
-  @Column({ type: 'date', name: 'fecha_nacimiento', nullable: true })
-  fecha_nacimiento: Date;
+  @Column({ type: 'varchar', name: 'fecha_nacimiento', nullable: true })
+  fecha_nacimiento: String;
 
   @Column({ type: 'boolean', default: true })
   activo: boolean;

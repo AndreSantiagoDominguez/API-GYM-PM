@@ -35,7 +35,7 @@ export class RegisterUseCase {
       rol_id: superAdminRole.id,
       gym_id: null,
       activo: true,
-      fecha_nacimiento: dto.fechaNacimiento ? new Date(dto.fechaNacimiento) : undefined,
+      fecha_nacimiento: dto.fechaNacimiento,
     });
 
     const payload = {
