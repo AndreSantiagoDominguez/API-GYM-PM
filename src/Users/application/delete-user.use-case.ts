@@ -19,11 +19,11 @@ export class DeleteUserUseCase {
     try {
       const userToDelete = await this.userRepository.findById(id);
       if (!userToDelete) {
-        throw new NotFoundException(`Usuario con ID ${id} no encontrado`);
+        console.log(`Usuario con ID ${id} no encontrado`);
       }
 
       if (userToDelete.id === currentUser.id) {
-        throw new ForbiddenException('No puedes eliminarte a ti mismo');
+         console.log('No puedes eliminarte a ti mismo');
       }
 
       this.validatePermissions(currentUser, userToDelete);
@@ -32,7 +32,7 @@ export class DeleteUserUseCase {
       await queryRunner.commitTransaction();
     } catch (error) {
       await queryRunner.rollbackTransaction();
-      throw error;
+       console.log(error);
     } finally {
       await queryRunner.release();
     }
