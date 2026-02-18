@@ -17,6 +17,8 @@ export class DeleteUserUseCase {
   await queryRunner.startTransaction();
 
   try {
+    console.log(id);
+    
     const userToDelete = await this.userRepository.findById(id);
     
     // VALIDACIÓN CRUCIAL: Si no hay usuario, lanza error y detén el proceso
