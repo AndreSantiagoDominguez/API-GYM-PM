@@ -19,7 +19,8 @@ export class UpdateUserUseCase {
     await queryRunner.startTransaction();
 
     try {
- 
+      console.log("estoy aqui");
+      
       // Hash password si se proporciona
       const dataToUpdate: Partial<User> = { ...dto };
       if (dto.password) {
@@ -31,7 +32,9 @@ export class UpdateUserUseCase {
       return updatedUser;
     } catch (error) {
       await queryRunner.rollbackTransaction();
-      throw error;
+      console.log(error);
+      return
+      
     } finally {
       await queryRunner.release();
     }
