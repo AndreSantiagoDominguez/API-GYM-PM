@@ -35,9 +35,8 @@ export class UpdateUserDto {
   telefono?: string;
 
   @IsOptional()
-  @Type(() => Date) 
-  @IsDateString()   
-  fechaNacimiento?: String;
+  @IsString()   
+  fecha_nacimiento?: String;
 
   @IsOptional()
   @IsNumber()

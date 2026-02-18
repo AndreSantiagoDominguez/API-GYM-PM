@@ -34,7 +34,7 @@ export class CreateUserUseCase {
         email: dto.email,
         password: hashedPassword,
         telefono: dto.telefono,
-        fecha_nacimiento: dto.fecha_nacimiento ? new Date(dto.fecha_nacimiento) : undefined,
+        fecha_nacimiento: dto.fecha_nacimiento,
         rol_id: dto.rol_id,
         gym_id: dto.gym_id,
         activo: dto.activo ?? true,

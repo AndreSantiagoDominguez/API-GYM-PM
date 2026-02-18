@@ -71,6 +71,8 @@ export class UserController {
     @Body() dto: UpdateUserDto,
     @CurrentUser() currentUser: User,
   ) {
+    console.log("ocod",dto);
+    
     const user = await this.updateUserUseCase.execute(id, dto, currentUser);
     return { success: true, message: 'Usuario actualizado', data: user };
   }
