@@ -64,7 +64,7 @@ export class UserController {
     return { success: true, message: 'Usuario creado', data: user };
   }
 
-  @Put(':id')
+  @Put('/:id')
   @Roles(RoleNames.SUPER_ADMIN, RoleNames.ADMIN, RoleNames.EMPLEADO, RoleNames.CLIENTE)
   async update(
     @Param('id', ParseIntPipe) id: number,
