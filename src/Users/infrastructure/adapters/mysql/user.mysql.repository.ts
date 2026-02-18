@@ -20,8 +20,7 @@ export class UserMySqlRepository implements IUserRepository {
 
   async findById(id: number): Promise<User | null> {
     return this.userRepository.findOne({
-      where: { id },
-      relations: ['rol', 'gym'],
+      where: { id : id}
     });
   }
 
