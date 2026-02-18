@@ -19,22 +19,7 @@ export class UpdateUserUseCase {
     await queryRunner.startTransaction();
 
     try {
-      const userToUpdate = await this.userRepository.findById(id);
-      if (!userToUpdate) {
-        throw new NotFoundException(`Usuario con ID ${id} no encontrado`);
-      }
-
-      // Validar permisos
-      this.validatePermissions(currentUser, userToUpdate);
-
-      // Verificar email único
-      if (dto.email && dto.email !== userToUpdate.email) {
-        const existingUser = await this.userRepository.findByEmail(dto.email);
-        if (existingUser) {
-          throw new ConflictException('El email ya está registrado');
-        }
-      }
-
+ 
       // Hash password si se proporciona
       const dataToUpdate: Partial<User> = { ...dto };
       if (dto.password) {
