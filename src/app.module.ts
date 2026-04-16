@@ -5,6 +5,7 @@ import { AuthModule } from './Auth/infrastructure/auth.module';
 import { UsersModule } from './Users/infrastructure/users.module';
 import { RolesModule } from './Roles/infrastructure/roles.module';
 import { GymsModule } from './Gyms/infrastructure/gyms.module';
+import { NotificationsModule } from './Notifications/infrastructure/notifications.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { GymsModule } from './Gyms/infrastructure/gyms.module';
     UsersModule,
     RolesModule,
     GymsModule,
+    NotificationsModule,
   ],
 })
 export class AppModule {}
