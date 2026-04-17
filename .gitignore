@@ -8,6 +8,8 @@ artifacts/
 # Environment variables
 .env
 firebase-adminsdk*.json
+gymsync-*.json
+*service-account*.json
 
 # Debug logs
 *.log
