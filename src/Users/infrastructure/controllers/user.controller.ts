@@ -8,8 +8,10 @@ import { CreateUserUseCase } from '../../application/create-user.use-case';
 import { UpdateUserUseCase } from '../../application/update-user.use-case';
 import { DeleteUserUseCase } from '../../application/delete-user.use-case';
 import { ToggleUserUseCase } from '../../application/toggle-user.use-case';
+import { UpdateFcmTokenUseCase } from '../../application/update-fcm-token.use-case';
 import { CreateUserDto } from '../../application/dto/create-user.dto';
 import { UpdateUserDto } from '../../application/dto/update-user.dto';
+import { UpdateFcmTokenDto } from '../../application/dto/update-fcm-token.dto';
 import { JwtAuthGuard } from '../../../core/guards/jwt-auth.guard';
 import { RolesGuard } from '../../../core/guards/roles.guard';
 import { Roles, RoleNames } from '../../../core/decorators/roles.decorator';
@@ -26,6 +28,7 @@ export class UserController {
     private readonly updateUserUseCase: UpdateUserUseCase,
     private readonly deleteUserUseCase: DeleteUserUseCase,
     private readonly toggleUserUseCase: ToggleUserUseCase,
+    private readonly updateFcmTokenUseCase: UpdateFcmTokenUseCase,
   ) {}
 
   @Get()
@@ -86,5 +89,17 @@ export class UserController {
   async toggleActive(@Param('id', ParseIntPipe) id: number, @CurrentUser() currentUser: User) {
     const user = await this.toggleUserUseCase.execute(id, currentUser);
     return { success: true, message: `Usuario ${user.activo ? 'activado' : 'desactivado'}`, data: user };
+  }
+
+  @Patch(':id/fcm-token')
+  @Roles(RoleNames.SUPER_ADMIN, RoleNames.ADMIN, RoleNames.EMPLEADO, RoleNames.CLIENTE)
+  @HttpCode(HttpStatus.OK)
+  async updateFcmToken(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: UpdateFcmTokenDto,
+    @CurrentUser() currentUser: User,
+  ) {
+    await this.updateFcmTokenUseCase.execute(id, dto.fcm_token, currentUser);
+    return { success: true, message: 'Token FCM actualizado', data: null };
   }
 }

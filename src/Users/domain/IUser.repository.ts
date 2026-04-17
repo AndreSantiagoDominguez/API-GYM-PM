@@ -8,6 +8,7 @@ export interface IUserRepository {
   create(user: Partial<User>): Promise<User>;
   update(id: number, user: Partial<User>): Promise<User>;
   delete(id: number): Promise<void>;
+  updateFcmToken(userId: number, token: string | null): Promise<void>;
 }
 
 export const USER_REPOSITORY = 'USER_REPOSITORY';

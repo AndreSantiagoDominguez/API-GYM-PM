@@ -8,6 +8,7 @@ artifacts/
 # Environment variables
 .env
 
+src/gymsync-5708f-bd2d5dccefd5.json
 
 # Debug logs
 *.log

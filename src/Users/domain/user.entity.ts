@@ -38,6 +38,12 @@ export class User {
   @Column({ type: 'boolean', default: true })
   activo: boolean;
 
+  @Column({ type: 'text', name: 'fcm_token', nullable: true })
+  fcmToken: string;
+
+  @Column({ type: 'boolean', name: 'receives_notifications', default: true })
+  receivesNotifications: boolean;
+
   @ManyToOne(() => Role, (role) => role.users, { eager: true })
   @JoinColumn({ name: 'rol_id' })
   rol: Role;

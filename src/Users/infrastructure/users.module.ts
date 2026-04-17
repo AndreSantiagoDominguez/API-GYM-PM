@@ -9,6 +9,7 @@ import { CreateUserUseCase } from '../application/create-user.use-case';
 import { UpdateUserUseCase } from '../application/update-user.use-case';
 import { DeleteUserUseCase } from '../application/delete-user.use-case';
 import { ToggleUserUseCase } from '../application/toggle-user.use-case';
+import { UpdateFcmTokenUseCase } from '../application/update-fcm-token.use-case';
 import { USER_REPOSITORY } from '../domain/IUser.repository';
 import { RolesModule } from '../../Roles/infrastructure/roles.module';
 import { GymsModule } from '../../Gyms/infrastructure/gyms.module';
@@ -27,6 +28,7 @@ import { GymsModule } from '../../Gyms/infrastructure/gyms.module';
     UpdateUserUseCase,
     DeleteUserUseCase,
     ToggleUserUseCase,
+    UpdateFcmTokenUseCase,
     {
       provide: USER_REPOSITORY,
       useClass: UserMySqlRepository,
