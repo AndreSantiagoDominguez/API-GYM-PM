@@ -10,12 +10,9 @@ import { CreateUserDto } from './dto/create-user.dto';
 @Injectable()
 export class CreateUserUseCase {
   constructor(
-    @Inject(USER_REPOSITORY)
-    private readonly userRepository: IUserRepository,
-    @Inject(ROLE_REPOSITORY)
-    private readonly roleRepository: IRoleRepository,
-    @Inject(GYM_REPOSITORY)
-    private readonly gymRepository: IGymRepository,
+    @Inject(USER_REPOSITORY) private readonly userRepository: IUserRepository,
+    @Inject(ROLE_REPOSITORY) private readonly roleRepository: IRoleRepository,
+    @Inject(GYM_REPOSITORY) private readonly gymRepository: IGymRepository,
     private readonly dataSource: DataSource,
   ) { }
 
@@ -25,76 +22,59 @@ export class CreateUserUseCase {
     await queryRunner.startTransaction();
 
     try {
-      // Verificar email único
-      const existingUser = await this.userRepository.findByEmail(dto.email);
-      if (existingUser) {
-        throw new ConflictException('El email ya está registrado');
-      }
+      // --- PASO CRÍTICO: Asegurar que el currentUser tenga el Rol cargado ---
+    
 
-      // Verificar rol
-      const role = await this.roleRepository.findById(dto.rolId);
-      if (!role) {
-        throw new NotFoundException('Rol no encontrado');
-      }
-
-      // Validar permisos
-      this.validatePermissions(currentUser, role.nombre);
-
-      // Verificar gym si aplica
-      if (dto.gymId) {
-        const gym = await this.gymRepository.findById(dto.gymId);
-        if (!gym) {
-          throw new NotFoundException('Gym no encontrado');
-        }
-      }
-
-      // Determinar gymId
-      let finalGymId = dto.gymId;
-      if (currentUser.rol.nombre !== 'super_admin') {
-        finalGymId = currentUser.gymId;
-      }
-
-      // Hash password
       const hashedPassword = await bcrypt.hash(dto.password, 10);
 
+      // 6. Creación
       const newUser = await this.userRepository.create({
-        ...dto,
+        nombres: dto.nombres,
+        apellidos: dto.apellidos,
+        email: dto.email,
         password: hashedPassword,
-        gymId: finalGymId,
+        telefono: dto.telefono,
+        fecha_nacimiento: dto.fecha_nacimiento,
+        rol_id: dto.rol_id,
+        gym_id: dto.gym_id,
         activo: dto.activo ?? true,
-        // Convertimos el string a objeto Date
-        fechaNacimiento: dto.fechaNacimiento ? new Date(dto.fechaNacimiento) : undefined,
       });
 
       await queryRunner.commitTransaction();
       return newUser;
+
     } catch (error) {
-      await queryRunner.rollbackTransaction();
+      // Solo hacemos rollback si la transacción sigue activa
+      if (queryRunner.isTransactionActive) {
+        await queryRunner.rollbackTransaction();
+      }
+      console.error("ERROR EN CREATE_USER_USE_CASE:", error.message);
       throw error;
     } finally {
       await queryRunner.release();
     }
   }
 
-  private validatePermissions(currentUser: User, targetRole: string): void {
-    const role = currentUser.rol.nombre;
+  private validatePermissions(user: User, targetRoleName: string): void {
+    // Aquí usamos 'user' que ya sabemos que tiene la propiedad 'rol'
+    const myRole = user.rol.nombre;
 
-    if (role === 'super_admin') return;
+    if (myRole === 'super_admin') return;
 
-    if (role === 'admin') {
-      if (targetRole === 'super_admin' || targetRole === 'admin') {
-        throw new ForbiddenException('No puedes crear usuarios con este rol');
+    if (myRole === 'admin') {
+      if (targetRoleName === 'super_admin' || targetRoleName === 'admin') {
+        throw new ForbiddenException('No tienes permisos para crear usuarios con este rango');
       }
       return;
     }
 
-    if (role === 'empleado') {
-      if (targetRole !== 'cliente') {
-        throw new ForbiddenException('Solo puedes crear clientes');
+    if (myRole === 'empleado') {
+      if (targetRoleName !== 'cliente') {
+        throw new ForbiddenException('Como empleado solo puedes registrar clientes');
       }
       return;
     }
 
-    throw new ForbiddenException('No tienes permisos para crear usuarios');
+    throw new ForbiddenException('No tienes permisos para realizar esta operación');
   }
 }

@@ -23,11 +23,11 @@ export class BroadcastUseCase {
     dto: BroadcastDto,
     adminUser: User,
   ): Promise<{ sent: number; message: string }> {
-    if (!adminUser.gymId) {
+    if (!adminUser.gym_id) {
       throw new BadRequestException('El admin no tiene un gimnasio asignado');
     }
 
-    const gymUsers = await this.userRepository.findByGymId(adminUser.gymId);
+    const gymUsers = await this.userRepository.findByGymId(adminUser.gym_id);
 
     const eligibleUsers = gymUsers.filter(
       (u) => u.fcmToken && u.receivesNotifications && u.id !== adminUser.id,
@@ -44,8 +44,8 @@ export class BroadcastUseCase {
 
     const { successCount, failedTokens } =
       await this.firebaseService.sendPushNotification(tokens, dto.title, dto.message, {
-        type: 'broadcast',
-        gymId: String(adminUser.gymId),
+        type: dto.type ?? 'GENERAL',
+        gymId: String(adminUser.gym_id),
       });
 
     if (failedTokens.length) {

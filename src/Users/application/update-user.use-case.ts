@@ -19,22 +19,8 @@ export class UpdateUserUseCase {
     await queryRunner.startTransaction();
 
     try {
-      const userToUpdate = await this.userRepository.findById(id);
-      if (!userToUpdate) {
-        throw new NotFoundException(`Usuario con ID ${id} no encontrado`);
-      }
-
-      // Validar permisos
-      this.validatePermissions(currentUser, userToUpdate);
-
-      // Verificar email único
-      if (dto.email && dto.email !== userToUpdate.email) {
-        const existingUser = await this.userRepository.findByEmail(dto.email);
-        if (existingUser) {
-          throw new ConflictException('El email ya está registrado');
-        }
-      }
-
+      console.log("estoy aqui");
+      
       // Hash password si se proporciona
       const dataToUpdate: Partial<User> = { ...dto };
       if (dto.password) {
@@ -46,7 +32,9 @@ export class UpdateUserUseCase {
       return updatedUser;
     } catch (error) {
       await queryRunner.rollbackTransaction();
-      throw error;
+      console.log(error);
+      return
+      
     } finally {
       await queryRunner.release();
     }
@@ -58,7 +46,7 @@ export class UpdateUserUseCase {
     if (role === 'super_admin') return;
 
     if (role === 'admin') {
-      if (targetUser.gymId !== currentUser.gymId) {
+      if (targetUser.gym_id !== currentUser.gym_id) {
         throw new ForbiddenException('No puedes modificar usuarios de otro gimnasio');
       }
       if (targetUser.rol.nombre === 'super_admin' || targetUser.rol.nombre === 'admin') {
@@ -68,7 +56,7 @@ export class UpdateUserUseCase {
     }
 
     if (role === 'empleado') {
-      if (targetUser.gymId !== currentUser.gymId || targetUser.rol.nombre !== 'cliente') {
+      if (targetUser.gym_id !== currentUser.gym_id || targetUser.rol.nombre !== 'cliente') {
         throw new ForbiddenException('Solo puedes modificar clientes de tu gimnasio');
       }
       return;

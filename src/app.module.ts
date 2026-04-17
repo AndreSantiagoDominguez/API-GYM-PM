@@ -16,7 +16,6 @@ import { NotificationsModule } from './Notifications/infrastructure/notification
     }),
     DatabaseModule,
     FirebaseModule,
-
     AuthModule,
     UsersModule,
     RolesModule,

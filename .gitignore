@@ -7,9 +7,14 @@ artifacts/
 
 # Environment variables
 .env
+
+# Firebase service account (NUNCA commitear)
 firebase-adminsdk*.json
 gymsync-*.json
 *service-account*.json
+firebase-service-account.json
+config/firebase-service-account.json
+**/firebase-service-account*.json
 
 # Debug logs
 *.log
@@ -25,4 +30,6 @@ Thumbs.db
 .idea/
 
 # TypeScript
-*.tsbuildinfofirebase-adminsdk*.json
+*.tsbuildinfo
+
+.claude*

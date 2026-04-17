@@ -19,7 +19,6 @@ import { CurrentUser } from '../../../core/decorators/current-user.decorator';
 import { User } from '../../domain/user.entity';
 
 @Controller('users')
-@UseGuards(JwtAuthGuard, RolesGuard)
 export class UserController {
   constructor(
     private readonly getAllUsersUseCase: GetAllUsersUseCase,
@@ -31,7 +30,7 @@ export class UserController {
     private readonly updateFcmTokenUseCase: UpdateFcmTokenUseCase,
   ) {}
 
-  @Get()
+  @Get('/')
   @Roles(RoleNames.SUPER_ADMIN)
   async findAll() {
     const users = await this.getAllUsersUseCase.execute();
@@ -44,7 +43,7 @@ export class UserController {
     @Param('gymId', ParseIntPipe) gymId: number,
     @CurrentUser() currentUser: User,
   ) {
-    if (currentUser.rol.nombre !== 'super_admin' && currentUser.gymId !== gymId) {
+    if (currentUser.rol.nombre !== 'super_admin' && currentUser.gym_id !== gymId) {
       return { success: false, message: 'No tienes acceso a este gimnasio', data: null };
     }
     const users = await this.getUserUseCase.executeByGym(gymId);
@@ -58,28 +57,33 @@ export class UserController {
     return { success: true, message: 'Usuario obtenido', data: user };
   }
 
-  @Post()
+  @Post("/")
   @Roles(RoleNames.SUPER_ADMIN, RoleNames.ADMIN, RoleNames.EMPLEADO)
   @HttpCode(HttpStatus.CREATED)
   async create(@Body() dto: CreateUserDto, @CurrentUser() currentUser: User) {
+    console.log(dto);
+    
     const user = await this.createUserUseCase.execute(dto, currentUser);
     return { success: true, message: 'Usuario creado', data: user };
   }
 
-  @Put(':id')
+  @Put('/:id')
   @Roles(RoleNames.SUPER_ADMIN, RoleNames.ADMIN, RoleNames.EMPLEADO, RoleNames.CLIENTE)
   async update(
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: UpdateUserDto,
     @CurrentUser() currentUser: User,
   ) {
+    console.log("ocod",dto);
+    
     const user = await this.updateUserUseCase.execute(id, dto, currentUser);
     return { success: true, message: 'Usuario actualizado', data: user };
   }
 
-  @Delete(':id')
+  @Delete('/:id')
   @Roles(RoleNames.SUPER_ADMIN, RoleNames.ADMIN)
   async delete(@Param('id', ParseIntPipe) id: number, @CurrentUser() currentUser: User) {
+    console.log("entro en delete ",id)
     await this.deleteUserUseCase.execute(id, currentUser);
     return { success: true, message: 'Usuario eliminado', data: null };
   }

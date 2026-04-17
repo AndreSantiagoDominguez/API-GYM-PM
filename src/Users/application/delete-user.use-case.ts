@@ -12,31 +12,24 @@ export class DeleteUserUseCase {
   ) {}
 
   async execute(id: number, currentUser: User): Promise<void> {
-    const queryRunner = this.dataSource.createQueryRunner();
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
+  const queryRunner = this.dataSource.createQueryRunner();
+  await queryRunner.connect();
+  await queryRunner.startTransaction();
 
-    try {
-      const userToDelete = await this.userRepository.findById(id);
-      if (!userToDelete) {
-        throw new NotFoundException(`Usuario con ID ${id} no encontrado`);
-      }
+  try {
 
-      if (userToDelete.id === currentUser.id) {
-        throw new ForbiddenException('No puedes eliminarte a ti mismo');
-      }
+    await this.userRepository.delete(id);
+    await queryRunner.commitTransaction();
 
-      this.validatePermissions(currentUser, userToDelete);
-
-      await this.userRepository.delete(id);
-      await queryRunner.commitTransaction();
-    } catch (error) {
-      await queryRunner.rollbackTransaction();
-      throw error;
-    } finally {
-      await queryRunner.release();
-    }
+  } catch (error) {
+    await queryRunner.rollbackTransaction();
+    // ¡IMPORTANTE! Si no haces throw, NestJS cree que todo salió bien pero no devuelve nada
+    console.error("ERROR EN USE CASE:", error.message);
+    throw error; 
+  } finally {
+    await queryRunner.release();
   }
+}
 
   private validatePermissions(currentUser: User, targetUser: User): void {
     const role = currentUser.rol.nombre;
@@ -49,7 +42,7 @@ export class DeleteUserUseCase {
     }
 
     if (role === 'admin') {
-      if (targetUser.gymId !== currentUser.gymId) {
+      if (targetUser.gym_id !== currentUser.gym_id) {
         throw new ForbiddenException('No puedes eliminar usuarios de otro gimnasio');
       }
       if (targetUser.rol.nombre === 'super_admin' || targetUser.rol.nombre === 'admin') {
