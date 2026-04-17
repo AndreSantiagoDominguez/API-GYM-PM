@@ -7,8 +7,7 @@ artifacts/
 
 # Environment variables
 .env
-
-src/gymsync-5708f-bd2d5dccefd5.json
+firebase-adminsdk*.json
 
 # Debug logs
 *.log
@@ -24,4 +23,4 @@ Thumbs.db
 .idea/
 
 # TypeScript
-*.tsbuildinfo
+*.tsbuildinfofirebase-adminsdk*.json
