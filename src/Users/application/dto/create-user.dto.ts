@@ -41,7 +41,6 @@ export class CreateUserDto {
   @IsBoolean()
   activo?: boolean;
 
-  @IsOptional()
   @IsNumber()
   @IsNotEmpty({ message: 'El rol es requerido' })
   rol_id: number;
