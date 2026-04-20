@@ -81,6 +81,8 @@ export class UserController {
     @CurrentUser() currentUser: User,
     @UploadedFile() file?: Express.Multer.File,
   ) {
+    console.log('📥 BODY recibido:', JSON.stringify(dto));
+    console.log('📎 Archivo recibido:', file ? file.originalname : 'ninguno');
     if (file) {
       dto.profile_image = await this.supabaseService.uploadProfileImage(file);
     }

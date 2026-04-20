@@ -49,7 +49,7 @@ export class CreateUserUseCase {
       if (queryRunner.isTransactionActive) {
         await queryRunner.rollbackTransaction();
       }
-      console.error("ERROR EN CREATE_USER_USE_CASE:", error.message);
+      console.error("❌ ERROR EN CREATE_USER_USE_CASE:", error.message, '\nSTACK:', error.stack);
       throw error;
     } finally {
       await queryRunner.release();
