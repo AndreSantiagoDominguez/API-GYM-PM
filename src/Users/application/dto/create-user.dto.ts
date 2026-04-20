@@ -2,7 +2,6 @@ import {
   IsEmail, IsNotEmpty, IsString, MinLength, MaxLength,
   IsOptional, IsDateString, IsNumber, IsBoolean, Matches,
 } from 'class-validator';
-import { Transform, Type } from 'class-transformer';
 
 export class CreateUserDto {
   @IsString()
@@ -38,21 +37,14 @@ export class CreateUserDto {
   fecha_nacimiento?: string;
 
   @IsOptional()
-  @Transform(({ value }) => {
-    if (value === 'true' || value === true) return true;
-    if (value === 'false' || value === false) return false;
-    return value;
-  })
   @IsBoolean()
   activo?: boolean;
 
-  @Type(() => Number)
   @IsNumber()
   @IsNotEmpty({ message: 'El rol es requerido' })
   rol_id: number;
 
   @IsOptional()
-  @Type(() => Number)
   @IsNumber()
   gym_id?: number;
 
