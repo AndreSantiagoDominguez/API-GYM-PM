@@ -37,10 +37,14 @@ export class UserController {
   ) {}
 
   @Get('/')
-  @Roles(RoleNames.SUPER_ADMIN)
-  async findAll() {
-    const users = await this.getAllUsersUseCase.execute();
-    return { success: true, message: 'Usuarios obtenidos', data: users };
+  @Roles(RoleNames.SUPER_ADMIN, RoleNames.ADMIN, RoleNames.EMPLEADO)
+  async findAll(@CurrentUser() currentUser: User) {
+    if (currentUser.rol.nombre === 'super_admin') {
+      const users = await this.getAllUsersUseCase.execute();
+      return { success: true, message: 'Usuarios obtenidos', data: users };
+    }
+    const users = await this.getUserUseCase.executeByGym(currentUser.gym_id);
+    return { success: true, message: 'Usuarios del gimnasio obtenidos', data: users };
   }
 
   @Get('gym/:gymId')
