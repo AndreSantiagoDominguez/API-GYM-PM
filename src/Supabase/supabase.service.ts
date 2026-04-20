@@ -9,8 +9,18 @@ import { ConfigService } from '@nestjs/config';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
 const BUCKET = 'GYMSYNC';
+
+const ALLOWED_EXTENSIONS = ['jpg', 'jpeg', 'png', 'webp', 'gif'];
 const ALLOWED_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
 const MAX_SIZE_BYTES = 5 * 1024 * 1024; // 5 MB
+
+const EXT_TO_MIME: Record<string, string> = {
+  jpg: 'image/jpeg',
+  jpeg: 'image/jpeg',
+  png: 'image/png',
+  webp: 'image/webp',
+  gif: 'image/gif',
+};
 
 @Injectable()
 export class SupabaseService implements OnModuleInit {
@@ -37,9 +47,13 @@ export class SupabaseService implements OnModuleInit {
       throw new InternalServerErrorException('Supabase no está configurado');
     }
 
-    if (!ALLOWED_MIME_TYPES.includes(file.mimetype)) {
+    const ext = file.originalname.split('.').pop()?.toLowerCase() ?? '';
+    const isValidMime = ALLOWED_MIME_TYPES.includes(file.mimetype);
+    const isValidExt = ALLOWED_EXTENSIONS.includes(ext);
+
+    if (!isValidMime && !isValidExt) {
       throw new BadRequestException(
-        `Tipo de archivo no permitido. Solo se aceptan: ${ALLOWED_MIME_TYPES.join(', ')}`,
+        'Tipo de archivo no permitido. Solo se aceptan: jpg, jpeg, png, webp, gif',
       );
     }
 
@@ -47,16 +61,13 @@ export class SupabaseService implements OnModuleInit {
       throw new BadRequestException('El archivo supera el tamaño máximo de 5 MB');
     }
 
-    const ext = file.originalname.split('.').pop()?.toLowerCase() ?? 'jpg';
+    const contentType = isValidMime ? file.mimetype : (EXT_TO_MIME[ext] ?? 'image/jpeg');
     const filename = `${Date.now()}-${file.originalname}`;
     const path = `profiles/${filename}`;
 
     const { error } = await this.client.storage
       .from(BUCKET)
-      .upload(path, file.buffer, {
-        contentType: file.mimetype,
-        upsert: false,
-      });
+      .upload(path, file.buffer, { contentType, upsert: false });
 
     if (error) {
       this.logger.error(`Error subiendo imagen a Supabase: ${error.message}`);
@@ -76,8 +87,9 @@ export class SupabaseService implements OnModuleInit {
       const pathParts = url.pathname.split(`/${BUCKET}/`);
       if (pathParts.length < 2) return;
 
-      const filePath = pathParts[1];
-      const { error } = await this.client.storage.from(BUCKET).remove([filePath]);
+      const { error } = await this.client.storage
+        .from(BUCKET)
+        .remove([pathParts[1]]);
 
       if (error) {
         this.logger.warn(`No se pudo eliminar imagen anterior: ${error.message}`);
