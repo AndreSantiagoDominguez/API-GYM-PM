@@ -24,6 +24,16 @@ async function bootstrap() {
       whitelist: true,
       transform: true,
       transformOptions: { enableImplicitConversion: true },
+      exceptionFactory: (errors) => {
+        const messages = errors.map(e => ({
+          field: e.property,
+          value: e.value,
+          errors: Object.values(e.constraints ?? {}),
+        }));
+        console.error('❌ VALIDATION ERRORS:', JSON.stringify(messages, null, 2));
+        const { BadRequestException } = require('@nestjs/common');
+        return new BadRequestException(messages);
+      },
     }),
   );
 
