@@ -7,7 +7,6 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { v4 as uuidv4 } from 'uuid';
 
 const BUCKET = 'GYMSYNC';
 const ALLOWED_MIME_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
@@ -49,7 +48,7 @@ export class SupabaseService implements OnModuleInit {
     }
 
     const ext = file.originalname.split('.').pop()?.toLowerCase() ?? 'jpg';
-    const filename = `${uuidv4()}.${ext}`;
+    const filename = `${Date.now()}-${file.originalname}`;
     const path = `profiles/${filename}`;
 
     const { error } = await this.client.storage
