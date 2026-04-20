@@ -1,7 +1,10 @@
 import {
   Controller, Get, Post, Put, Delete, Patch,
   Body, Param, ParseIntPipe, UseGuards, HttpCode, HttpStatus,
+  UseInterceptors, UploadedFile,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { memoryStorage } from 'multer';
 import { GetAllUsersUseCase } from '../../application/get-all-users.use-case';
 import { GetUserUseCase } from '../../application/get-user.use-case';
 import { CreateUserUseCase } from '../../application/create-user.use-case';
@@ -17,8 +20,10 @@ import { RolesGuard } from '../../../core/guards/roles.guard';
 import { Roles, RoleNames } from '../../../core/decorators/roles.decorator';
 import { CurrentUser } from '../../../core/decorators/current-user.decorator';
 import { User } from '../../domain/user.entity';
+import { SupabaseService } from '../../../Supabase/supabase.service';
 
 @Controller('users')
+@UseGuards(JwtAuthGuard, RolesGuard)
 export class UserController {
   constructor(
     private readonly getAllUsersUseCase: GetAllUsersUseCase,
@@ -28,6 +33,7 @@ export class UserController {
     private readonly deleteUserUseCase: DeleteUserUseCase,
     private readonly toggleUserUseCase: ToggleUserUseCase,
     private readonly updateFcmTokenUseCase: UpdateFcmTokenUseCase,
+    private readonly supabaseService: SupabaseService,
   ) {}
 
   @Get('/')
@@ -57,12 +63,23 @@ export class UserController {
     return { success: true, message: 'Usuario obtenido', data: user };
   }
 
-  @Post("/")
+  @Post('/')
   @Roles(RoleNames.SUPER_ADMIN, RoleNames.ADMIN, RoleNames.EMPLEADO)
   @HttpCode(HttpStatus.CREATED)
-  async create(@Body() dto: CreateUserDto, @CurrentUser() currentUser: User) {
-    console.log(dto);
-    
+  @UseInterceptors(
+    FileInterceptor('profile_image', {
+      storage: memoryStorage(),
+      limits: { fileSize: 5 * 1024 * 1024 },
+    }),
+  )
+  async create(
+    @Body() dto: CreateUserDto,
+    @CurrentUser() currentUser: User,
+    @UploadedFile() file?: Express.Multer.File,
+  ) {
+    if (file) {
+      dto.profile_image = await this.supabaseService.uploadProfileImage(file);
+    }
     const user = await this.createUserUseCase.execute(dto, currentUser);
     return { success: true, message: 'Usuario creado', data: user };
   }
@@ -74,8 +91,6 @@ export class UserController {
     @Body() dto: UpdateUserDto,
     @CurrentUser() currentUser: User,
   ) {
-    console.log("ocod",dto);
-    
     const user = await this.updateUserUseCase.execute(id, dto, currentUser);
     return { success: true, message: 'Usuario actualizado', data: user };
   }
@@ -83,7 +98,6 @@ export class UserController {
   @Delete('/:id')
   @Roles(RoleNames.SUPER_ADMIN, RoleNames.ADMIN)
   async delete(@Param('id', ParseIntPipe) id: number, @CurrentUser() currentUser: User) {
-    console.log("entro en delete ",id)
     await this.deleteUserUseCase.execute(id, currentUser);
     return { success: true, message: 'Usuario eliminado', data: null };
   }

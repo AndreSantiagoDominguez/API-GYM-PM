@@ -6,6 +6,7 @@ import { UsersModule } from './Users/infrastructure/users.module';
 import { RolesModule } from './Roles/infrastructure/roles.module';
 import { GymsModule } from './Gyms/infrastructure/gyms.module';
 import { FirebaseModule } from './Firebase/firebase.module';
+import { SupabaseModule } from './Supabase/supabase.module';
 import { NotificationsModule } from './Notifications/infrastructure/notifications.module';
 
 @Module({
@@ -16,6 +17,7 @@ import { NotificationsModule } from './Notifications/infrastructure/notification
     }),
     DatabaseModule,
     FirebaseModule,
+    SupabaseModule,
     AuthModule,
     UsersModule,
     RolesModule,

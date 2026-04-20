@@ -38,6 +38,9 @@ export class User {
   @Column({ type: 'boolean', default: true })
   activo: boolean;
 
+  @Column({ type: 'text', name: 'profile_image', nullable: true })
+  profile_image: string;
+
   @Column({ type: 'text', name: 'fcm_token', nullable: true })
   fcmToken: string;
 

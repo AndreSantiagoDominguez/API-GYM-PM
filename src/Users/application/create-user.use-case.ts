@@ -38,6 +38,7 @@ export class CreateUserUseCase {
         rol_id: dto.rol_id,
         gym_id: dto.gym_id,
         activo: dto.activo ?? true,
+        profile_image: dto.profile_image ?? null,
       });
 
       await queryRunner.commitTransaction();
